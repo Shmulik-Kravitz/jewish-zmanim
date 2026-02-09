@@ -1,0 +1,44 @@
+{
+  "name": "jewish-zmanim",
+  "version": "0.0.0",
+  "description": "Jewish Zmanim",
+  "author": "",
+  "license": "MIT",
+  "homepage": "https://github.com/Shmulik-Kravitz/jewish-zmanim",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Shmulik-Kravitz/jewish-zmanim.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Shmulik-Kravitz/jewish-zmanim/issues"
+  },
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "types": "./dist/index.d.cts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "yarn typecheck && tsdown",
+    "dev": "tsdown --watch",
+    "test": "vitest",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.3",
+    "@vitest/coverage-v8": "4.0.18",
+    "bumpp": "^10.3.2",
+    "tsdown": "^0.18.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.16"
+  },
+  "packageManager": "yarn@4.12.0"
+}
