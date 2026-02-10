@@ -63,8 +63,17 @@ export function equationOfTime(T: number): number {
 }
 
 export function hourAngleDeg(lat: number, dec: number, zenith: number): number {
-  const cosHA = (Math.cos(zenith * D2R) - Math.sin(lat * D2R) * Math.sin(dec * D2R))
-    / (Math.cos(lat * D2R) * Math.cos(dec * D2R));
+  const latRad = lat * D2R;
+  const decRad = dec * D2R;
+  const zenRad = zenith * D2R;
+
+  const denom = Math.cos(latRad) * Math.cos(decRad);
+  // When the denominator is (numerically) zero, the geometry is undefined
+  // (e.g. observer at the pole with dec≈0 and zenith≈90°). Treat this as
+  // "no solution" and return NaN so callers can handle impossible geometry.
+  if (Math.abs(denom) < 1e-12) return NaN;
+
+  const cosHA = (Math.cos(zenRad) - Math.sin(latRad) * Math.sin(decRad)) / denom;
   if (Math.abs(cosHA) > 1) return NaN;
   return Math.acos(cosHA) * R2D;
 }

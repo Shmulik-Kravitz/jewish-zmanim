@@ -101,32 +101,32 @@ describe('Zmanim - static methods', () => {
 describe('Zmanim - getCityInfoByRow', () => {
   it('sets min=40 for Jerusalem', () => {
     const row: CityRow = { latitude: 31.77, longitude: 35.21, country_en: 'Israel', city_en: 'Jerusalem' };
-    const info = Zmanim.getCityInfoByRow(row, '2024-06-15');
+    const info = Zmanim.getCityInfoByRow(row, new Date('2024-06-15'));
     assert.equal(info.min, 40);
   });
 
   it('sets min=30 for Haifa', () => {
     const row: CityRow = { latitude: 32.79, longitude: 34.99, country_en: 'Israel', city_en: 'haifa' };
-    const info = Zmanim.getCityInfoByRow(row, '2024-06-15');
+    const info = Zmanim.getCityInfoByRow(row, new Date('2024-06-15'));
     assert.equal(info.min, 30);
   });
 
   it('sets min=30 for other Israeli cities', () => {
     const row: CityRow = { latitude: 32.08, longitude: 34.78, country_en: 'Israel', city_en: 'Tel Aviv' };
-    const info = Zmanim.getCityInfoByRow(row, '2024-06-15');
+    const info = Zmanim.getCityInfoByRow(row, new Date('2024-06-15'));
     assert.equal(info.min, 30);
   });
 
   it('sets min=18 for non-Israeli cities', () => {
     const row: CityRow = { latitude: 40.71, longitude: -74.0, country_en: 'New York', more: 'us' };
-    const info = Zmanim.getCityInfoByRow(row, '2024-06-15');
+    const info = Zmanim.getCityInfoByRow(row, new Date('2024-06-15'));
     assert.equal(info.min, 18);
   });
 });
 
 describe('Zmanim - time calculations', () => {
   it('Jerusalem winter - sunrise around 6:00-7:30, sunset around 16:30-17:30', () => {
-    const z = new Zmanim(jerusalemWinter, '2024-01-15');
+    const z = new Zmanim(jerusalemWinter, new Date('2024-01-15'));
     const sunrise = timeToMinutes(z.times.netzHachama);
     const sunset = timeToMinutes(z.times.shkiah);
 
@@ -137,7 +137,7 @@ describe('Zmanim - time calculations', () => {
   });
 
   it('Jerusalem summer - sunrise around 5:00-6:00, sunset around 19:00-20:30', () => {
-    const z = new Zmanim(jerusalemSummer, '2024-06-21');
+    const z = new Zmanim(jerusalemSummer, new Date('2024-06-21'));
     const sunrise = timeToMinutes(z.times.netzHachama);
     const sunset = timeToMinutes(z.times.shkiah);
 
@@ -148,7 +148,7 @@ describe('Zmanim - time calculations', () => {
   });
 
   it('time order is correct: alot < tefillin < sunrise < shema < tefila < chatzos < minchaGedola < manchKtana < plagHamincha < shkiah < tzes', () => {
-    const z = new Zmanim(jerusalemWinter, '2024-03-20');
+    const z = new Zmanim(jerusalemWinter, new Date('2024-03-20'));
 
     const order = [
       { name: 'alosHashachar', val: timeToMinutes(z.times.alosHashachar) },
@@ -173,7 +173,7 @@ describe('Zmanim - time calculations', () => {
   });
 
   it('shabbat enter is afternoon, shabbat exit is after enter', () => {
-    const z = new Zmanim(jerusalemWinter, '2024-03-20');
+    const z = new Zmanim(jerusalemWinter, new Date('2024-03-20'));
     const shabbosEnter = timeToMinutes(z.times.shabbosEnter);
     const shabbosExit = timeToMinutes(z.times.shabbosExit);
 
@@ -185,7 +185,7 @@ describe('Zmanim - time calculations', () => {
 
 describe('Zmanim - New York', () => {
   it('NY winter - reasonable sunrise/sunset', () => {
-    const z = new Zmanim(newYorkInfo, '2024-01-15');
+    const z = new Zmanim(newYorkInfo, new Date('2024-01-15'));
     const sunrise = timeToMinutes(z.times.netzHachama);
     const sunset = timeToMinutes(z.times.shkiah);
 
@@ -198,21 +198,21 @@ describe('Zmanim - New York', () => {
 
 describe('Zmanim - toTime', () => {
   it('formats time correctly with ceil', () => {
-    const z = new Zmanim(jerusalemWinter, '2024-01-01');
+    const z = new Zmanim(jerusalemWinter, new Date('2024-01-01'));
     assert.equal(z.toTime(6.5), '6:30:00');
     assert.equal(z.toTime(12.0), '12:00:00');
     assert.equal(z.toTime(18.75), '18:45:00');
   });
 
   it('formats time correctly with floor', () => {
-    const z = new Zmanim(jerusalemWinter, '2024-01-01');
+    const z = new Zmanim(jerusalemWinter, new Date('2024-01-01'));
     assert.equal(z.toTime(6.5, 'floor'), '6:30:00');
   });
 });
 
 describe('Zmanim - getTimes', () => {
   it('getTimes removes internal fields', () => {
-    const z = new Zmanim(jerusalemWinter, '2024-03-20');
+    const z = new Zmanim(jerusalemWinter, new Date('2024-03-20'));
     const times = z.getTimes();
 
     assert.equal(times.sunrise, undefined);
@@ -230,8 +230,8 @@ describe('Zmanim - getTimes', () => {
 
 describe('Zmanim - Tel Aviv vs Jerusalem', () => {
   it('Tel Aviv sunrise is slightly later than Jerusalem (west)', () => {
-    const zJlm = new Zmanim(jerusalemSummer, '2024-06-15');
-    const zTlv = new Zmanim(telAvivSummer, '2024-06-15');
+    const zJlm = new Zmanim(jerusalemSummer, new Date('2024-06-15'));
+    const zTlv = new Zmanim(telAvivSummer, new Date('2024-06-15'));
 
     const jlmSunrise = timeToMinutes(zJlm.times.netzHachama);
     const tlvSunrise = timeToMinutes(zTlv.times.netzHachama);
@@ -265,7 +265,7 @@ const safedElev: CityInfo = {
 };
 
 describe('Zmanim - accuracy vs MyZmanim (Jerusalem Feb 8 2026)', () => {
-  const z = new Zmanim(jerusalemElev, '2026-02-08');
+  const z = new Zmanim(jerusalemElev, new Date('2026-02-08'));
   const T = 30; // tolerance in seconds
 
   it('alos within 30s', () => assertWithinSeconds(z.times.alosHashachar, '5:13:45', T, 'alos'));
@@ -281,7 +281,7 @@ describe('Zmanim - accuracy vs MyZmanim (Jerusalem Feb 8 2026)', () => {
 });
 
 describe('Zmanim - accuracy vs MyZmanim (Safed Feb 13 2026)', () => {
-  const z = new Zmanim(safedElev, '2026-02-13');
+  const z = new Zmanim(safedElev, new Date('2026-02-13'));
   const T = 30;
 
   it('alos within 30s', () => assertWithinSeconds(z.times.alosHashachar, '5:09:26', T, 'alos'));
@@ -301,7 +301,7 @@ const brooklynInfo: CityInfo = {
 };
 
 describe('Zmanim - accuracy vs MyZmanim (Brooklyn Feb 8 2026)', () => {
-  const z = new Zmanim(brooklynInfo, '2026-02-08');
+  const z = new Zmanim(brooklynInfo, new Date('2026-02-08'));
   const T = 5; // Brooklyn is extremely precise — 5s tolerance
 
   it('alos within 5s', () => assertWithinSeconds(z.times.alosHashachar, '5:35:32', T, 'alos'));
@@ -317,7 +317,7 @@ describe('Zmanim - accuracy vs MyZmanim (Brooklyn Feb 8 2026)', () => {
 });
 
 describe('Zmanim - accuracy vs MyZmanim (Brooklyn Feb 13 2026 Shabbat)', () => {
-  const z = new Zmanim(brooklynInfo, '2026-02-13');
+  const z = new Zmanim(brooklynInfo, new Date('2026-02-13'));
   const T = 5;
 
   it('alos within 5s', () => assertWithinSeconds(z.times.alosHashachar, '5:30:08', T, 'alos'));
@@ -338,7 +338,7 @@ const parisInfo: CityInfo = {
 };
 
 describe('Zmanim - accuracy vs MyZmanim (Paris Feb 8 2026)', () => {
-  const z = new Zmanim(parisInfo, '2026-02-08');
+  const z = new Zmanim(parisInfo, new Date('2026-02-08'));
   const T = 10;
 
   it('alos within 10s', () => assertWithinSeconds(z.times.alosHashachar, '6:34:55', T, 'alos'));
@@ -351,7 +351,7 @@ describe('Zmanim - accuracy vs MyZmanim (Paris Feb 8 2026)', () => {
 });
 
 describe('Zmanim - accuracy vs MyZmanim (Paris Feb 13 2026 Shabbat)', () => {
-  const z = new Zmanim(parisInfo, '2026-02-13');
+  const z = new Zmanim(parisInfo, new Date('2026-02-13'));
   const T = 10;
 
   it('alos', () => assertWithinSeconds(z.times.alosHashachar, '6:27:39', T, 'alos'));
@@ -372,7 +372,7 @@ const beitShemeshInfo: CityInfo = {
 };
 
 describe('Zmanim - accuracy vs MyZmanim (Beit Shemesh Feb 8 2026)', () => {
-  const z = new Zmanim(beitShemeshInfo, '2026-02-08');
+  const z = new Zmanim(beitShemeshInfo, new Date('2026-02-08'));
   const T = 10;
 
   it('alos', () => assertWithinSeconds(z.times.alosHashachar, '5:14:38', T, 'alos'));
@@ -385,7 +385,7 @@ describe('Zmanim - accuracy vs MyZmanim (Beit Shemesh Feb 8 2026)', () => {
 });
 
 describe('Zmanim - accuracy vs MyZmanim (Beit Shemesh Feb 13 2026 Shabbat)', () => {
-  const z = new Zmanim(beitShemeshInfo, '2026-02-13');
+  const z = new Zmanim(beitShemeshInfo, new Date('2026-02-13'));
   const T = 10;
 
   it('alos', () => assertWithinSeconds(z.times.alosHashachar, '5:10:53', T, 'alos'));
@@ -405,7 +405,7 @@ const modiinInfo: CityInfo = {
 };
 
 describe('Zmanim - accuracy vs MyZmanim (Modiin Feb 8 2026)', () => {
-  const z = new Zmanim(modiinInfo, '2026-02-08');
+  const z = new Zmanim(modiinInfo, new Date('2026-02-08'));
   const T = 5;
 
   it('alos', () => assertWithinSeconds(z.times.alosHashachar, '5:14:38', T, 'alos'));
@@ -418,7 +418,7 @@ describe('Zmanim - accuracy vs MyZmanim (Modiin Feb 8 2026)', () => {
 });
 
 describe('Zmanim - accuracy vs MyZmanim (Modiin Feb 13 2026 Shabbat)', () => {
-  const z = new Zmanim(modiinInfo, '2026-02-13');
+  const z = new Zmanim(modiinInfo, new Date('2026-02-13'));
   const T = 5;
 
   it('alos', () => assertWithinSeconds(z.times.alosHashachar, '5:10:52', T, 'alos'));
@@ -437,7 +437,7 @@ const maalehAdumimInfo: CityInfo = {
 };
 
 describe('Zmanim - accuracy vs MyZmanim (Maaleh Adumim Feb 8 2026)', () => {
-  const z = new Zmanim(maalehAdumimInfo, '2026-02-08');
+  const z = new Zmanim(maalehAdumimInfo, new Date('2026-02-08'));
   const T = 5;
 
   it('alos', () => assertWithinSeconds(z.times.alosHashachar, '5:13:25', T, 'alos'));
@@ -450,7 +450,7 @@ describe('Zmanim - accuracy vs MyZmanim (Maaleh Adumim Feb 8 2026)', () => {
 });
 
 describe('Zmanim - accuracy vs MyZmanim (Maaleh Adumim Feb 13 2026 Shabbat)', () => {
-  const z = new Zmanim(maalehAdumimInfo, '2026-02-13');
+  const z = new Zmanim(maalehAdumimInfo, new Date('2026-02-13'));
   const T = 5;
 
   it('alos', () => assertWithinSeconds(z.times.alosHashachar, '5:09:39', T, 'alos'));
@@ -470,7 +470,7 @@ const haifaInfo: CityInfo = {
 };
 
 describe('Zmanim - accuracy vs MyZmanim (Haifa Feb 8 2026)', () => {
-  const z = new Zmanim(haifaInfo, '2026-02-08');
+  const z = new Zmanim(haifaInfo, new Date('2026-02-08'));
   const T = 10;
 
   it('alos', () => assertWithinSeconds(z.times.alosHashachar, '5:15:24', T, 'alos'));
@@ -483,7 +483,7 @@ describe('Zmanim - accuracy vs MyZmanim (Haifa Feb 8 2026)', () => {
 });
 
 describe('Zmanim - accuracy vs MyZmanim (Haifa Feb 13 2026 Shabbat)', () => {
-  const z = new Zmanim(haifaInfo, '2026-02-13');
+  const z = new Zmanim(haifaInfo, new Date('2026-02-13'));
   const T = 10;
 
   it('alos', () => assertWithinSeconds(z.times.alosHashachar, '5:11:28', T, 'alos'));
@@ -502,7 +502,7 @@ const londonInfo: CityInfo = {
 };
 
 describe('Zmanim - accuracy vs MyZmanim (London Feb 8 2026)', () => {
-  const z = new Zmanim(londonInfo, '2026-02-08');
+  const z = new Zmanim(londonInfo, new Date('2026-02-08'));
   const T = 10;
 
   it('alos', () => assertWithinSeconds(z.times.alosHashachar, '5:45:56', T, 'alos'));
@@ -522,7 +522,7 @@ const melbourneInfo: CityInfo = {
 };
 
 describe('Zmanim - accuracy vs MyZmanim (Melbourne Feb 9 2026)', () => {
-  const z = new Zmanim(melbourneInfo, '2026-02-09');
+  const z = new Zmanim(melbourneInfo, new Date('2026-02-09'));
   const T = 10;
 
   it('alos', () => assertWithinSeconds(z.times.alosHashachar, '5:15:44', T, 'alos'));
@@ -536,7 +536,7 @@ describe('Zmanim - accuracy vs MyZmanim (Melbourne Feb 9 2026)', () => {
 });
 
 describe('Zmanim - accuracy vs MyZmanim (Melbourne Feb 13 2026 Shabbat)', () => {
-  const z = new Zmanim(melbourneInfo, '2026-02-13');
+  const z = new Zmanim(melbourneInfo, new Date('2026-02-13'));
   const T = 10;
 
   it('alos', () => assertWithinSeconds(z.times.alosHashachar, '5:21:34', T, 'alos'));
@@ -555,7 +555,7 @@ const miamiInfo: CityInfo = {
 };
 
 describe('Zmanim - accuracy vs MyZmanim (Miami Feb 8 2026)', () => {
-  const z = new Zmanim(miamiInfo, '2026-02-08');
+  const z = new Zmanim(miamiInfo, new Date('2026-02-08'));
   const T = 5;
 
   it('alos', () => assertWithinSeconds(z.times.alosHashachar, '5:51:05', T, 'alos'));
@@ -569,7 +569,7 @@ describe('Zmanim - accuracy vs MyZmanim (Miami Feb 8 2026)', () => {
 });
 
 describe('Zmanim - accuracy vs MyZmanim (Miami Feb 13 2026 Shabbat)', () => {
-  const z = new Zmanim(miamiInfo, '2026-02-13');
+  const z = new Zmanim(miamiInfo, new Date('2026-02-13'));
   const T = 5;
 
   it('alos', () => assertWithinSeconds(z.times.alosHashachar, '5:48:13', T, 'alos'));
@@ -588,7 +588,7 @@ const beerShevaInfo: CityInfo = {
 };
 
 describe('Zmanim - accuracy vs MyZmanim (Beer Sheva Feb 8 2026)', () => {
-  const z = new Zmanim(beerShevaInfo, '2026-02-08');
+  const z = new Zmanim(beerShevaInfo, new Date('2026-02-08'));
   const T = 5;
 
   it('alos', () => assertWithinSeconds(z.times.alosHashachar, '5:15:06', T, 'alos'));
@@ -601,7 +601,7 @@ describe('Zmanim - accuracy vs MyZmanim (Beer Sheva Feb 8 2026)', () => {
 });
 
 describe('Zmanim - accuracy vs MyZmanim (Beer Sheva Feb 13 2026 Shabbat)', () => {
-  const z = new Zmanim(beerShevaInfo, '2026-02-13');
+  const z = new Zmanim(beerShevaInfo, new Date('2026-02-13'));
   const T = 5;
 
   it('alos', () => assertWithinSeconds(z.times.alosHashachar, '5:11:25', T, 'alos'));
@@ -620,7 +620,7 @@ const eilatInfo: CityInfo = {
 };
 
 describe('Zmanim - accuracy vs MyZmanim (Eilat Feb 8 2026)', () => {
-  const z = new Zmanim(eilatInfo, '2026-02-08');
+  const z = new Zmanim(eilatInfo, new Date('2026-02-08'));
   const T = 5;
 
   it('alos', () => assertWithinSeconds(z.times.alosHashachar, '5:13:19', T, 'alos'));
@@ -633,7 +633,7 @@ describe('Zmanim - accuracy vs MyZmanim (Eilat Feb 8 2026)', () => {
 });
 
 describe('Zmanim - accuracy vs MyZmanim (Eilat Feb 13 2026 Shabbat)', () => {
-  const z = new Zmanim(eilatInfo, '2026-02-13');
+  const z = new Zmanim(eilatInfo, new Date('2026-02-13'));
   const T = 5;
 
   it('alos', () => assertWithinSeconds(z.times.alosHashachar, '5:09:54', T, 'alos'));
@@ -652,7 +652,7 @@ const sarcellesInfo: CityInfo = {
 };
 
 describe('Zmanim - accuracy vs MyZmanim (Sarcelles Feb 8 2026)', () => {
-  const z = new Zmanim(sarcellesInfo, '2026-02-08');
+  const z = new Zmanim(sarcellesInfo, new Date('2026-02-08'));
   const T = 10;
 
   it('alos', () => assertWithinSeconds(z.times.alosHashachar, '6:34:47', T, 'alos'));
@@ -664,7 +664,7 @@ describe('Zmanim - accuracy vs MyZmanim (Sarcelles Feb 8 2026)', () => {
 });
 
 describe('Zmanim - accuracy vs MyZmanim (Sarcelles Feb 13 2026 Shabbat)', () => {
-  const z = new Zmanim(sarcellesInfo, '2026-02-13');
+  const z = new Zmanim(sarcellesInfo, new Date('2026-02-13'));
   const T = 10;
 
   it('alos', () => assertWithinSeconds(z.times.alosHashachar, '6:27:29', T, 'alos'));
@@ -683,7 +683,7 @@ const kiryatMalachiInfo: CityInfo = {
 };
 
 describe('Zmanim - accuracy vs MyZmanim (Kiryat Malachi Feb 13 2026 Shabbat)', () => {
-  const z = new Zmanim(kiryatMalachiInfo, '2026-02-13');
+  const z = new Zmanim(kiryatMalachiInfo, new Date('2026-02-13'));
   const c = z.getChabadZmanim();
   const T = 5;
 
@@ -706,7 +706,7 @@ describe('Zmanim - accuracy vs MyZmanim (Kiryat Malachi Feb 13 2026 Shabbat)', (
 });
 
 describe('Zmanim - Chabad accuracy (Brooklyn Feb 13 2026)', () => {
-  const z = new Zmanim(brooklynInfo, '2026-02-13');
+  const z = new Zmanim(brooklynInfo, new Date('2026-02-13'));
   const c = z.getChabadZmanim();
   const T = 5;
 
@@ -724,7 +724,7 @@ describe('Zmanim - Chabad accuracy (Brooklyn Feb 13 2026)', () => {
 });
 
 describe('Zmanim - Chabad accuracy (Jerusalem Feb 8 2026)', () => {
-  const z = new Zmanim(jerusalemElev, '2026-02-08');
+  const z = new Zmanim(jerusalemElev, new Date('2026-02-08'));
   const c = z.getChabadZmanim();
   const T = 30;
 
@@ -742,7 +742,7 @@ describe('Zmanim - Chabad accuracy (Jerusalem Feb 8 2026)', () => {
 });
 
 describe('Zmanim - Chabad accuracy (London Feb 13 2026)', () => {
-  const z = new Zmanim(londonInfo, '2026-02-13');
+  const z = new Zmanim(londonInfo, new Date('2026-02-13'));
   const c = z.getChabadZmanim();
   const T = 10;
 
@@ -762,7 +762,7 @@ describe('Zmanim - Chabad accuracy (London Feb 13 2026)', () => {
 });
 
 describe('Zmanim - Chabad accuracy (Melbourne Feb 13 2026)', () => {
-  const z = new Zmanim(melbourneInfo, '2026-02-13');
+  const z = new Zmanim(melbourneInfo, new Date('2026-02-13'));
   const c = z.getChabadZmanim();
   const T = 10;
 
@@ -776,5 +776,94 @@ describe('Zmanim - Chabad accuracy (Melbourne Feb 13 2026)', () => {
   it('plag', () => assertWithinSeconds(c.plagHamincha, '18:56:11', T, 'plag'));
   it('tzeis RT 72', () => assertWithinSeconds(c.tzeisRT, '21:32:59', T, 'tzeisRT'));
   it('chatzot layla', () => assertWithinSeconds(c.chatzotLayla, '1:34:33', T, 'chatzotL'));
+});
+
+// ─── Additional utility & factory coverage ───
+
+describe('Zmanim - utility methods', () => {
+  it('getDayOfWeek returns correct weekday index', () => {
+    const z = new Zmanim(jerusalemWinter, new Date('2026-02-10')); // Tuesday
+    assert.equal(z.getDayOfWeek(), 2); // 0=Sun,1=Mon,2=Tue
+  });
+
+  it('calcTimes uses default zenith when args are null', () => {
+    const z = new Zmanim(jerusalemWinter, new Date('2024-01-15'));
+    const def = z.calcTimes();
+    const custom = z.calcTimes(91, 0); // 91° zenith vs default 90°50'
+
+    assert.notEqual(def.sunrise_num, custom.sunrise_num);
+    assert.notEqual(def.sunset_num, custom.sunset_num);
+  });
+
+  it('toUnixTimestamp matches JS Date unix time', () => {
+    const date = new Date('2024-01-01T00:00:00');
+    const z = new Zmanim(jerusalemWinter, date);
+    const ts = z.toUnixTimestamp(12.5); // 12:30:00 local
+    const expected = Math.floor(
+      new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 30, 0).getTime() / 1000
+    );
+    assert.equal(ts, expected);
+  });
+
+  it('handles timezone 13 edge case via calcTimes', () => {
+    const tz13City: CityInfo = {
+      latitude: 0,
+      longitude: 0,
+      country: '',
+      city: '',
+      timezone: 13,
+      dst: false,
+      min: 18,
+    };
+    const z = new Zmanim(tz13City, new Date('2024-01-01'));
+    const res = z.calcTimes();
+    assert.ok(typeof res.sunrise === 'string');
+    assert.ok(typeof res.sunset === 'string');
+  });
+});
+
+describe('Zmanim.fromCoordinates', () => {
+  it('creates Zmanim with Jerusalem candle minutes = 40', () => {
+    const z = Zmanim.fromCoordinates(31.78, 35.22, new Date('2026-02-13'));
+    const internal = z as any;
+    assert.equal(internal.shabatmin, 40);
+    assert.equal(z.timezoneInfo.timezoneName, 'Asia/Jerusalem');
+  });
+
+  it('creates Zmanim with non-Jerusalem Israel candle minutes = 30', () => {
+    const z = Zmanim.fromCoordinates(32.08, 34.78, new Date('2026-02-13'));
+    const internal = z as any;
+    assert.equal(internal.shabatmin, 30);
+  });
+
+  it('honors custom candleMinutes and tefillinDeg and matches direct CityInfo', () => {
+    const date = new Date('2026-02-08');
+    const zFrom = Zmanim.fromCoordinates(
+      maalehAdumimInfo.latitude,
+      maalehAdumimInfo.longitude,
+      date,
+      { candleMinutes: 30, tefillinDeg: 11 }
+    );
+    const zDirect = new Zmanim(maalehAdumimInfo, date);
+
+    assert.equal(zFrom.times.tefillin, zDirect.times.tefillin);
+    assert.equal(zFrom.times.netzHachama, zDirect.times.netzHachama);
+  });
+});
+
+describe('Zmanim.getCityInfoByRow - error fallback', () => {
+  it('falls back to timezone=0,dst=false on invalid timezone', () => {
+    const row: CityRow = {
+      latitude: 10,
+      longitude: 20,
+      country_en: 'Nowhere',
+      city_en: 'Nowhere',
+      tz_name: 'Invalid/Zone',
+    };
+    const info = Zmanim.getCityInfoByRow(row, new Date('2026-02-13'));
+    assert.equal(info.timezone, 0);
+    assert.equal(info.dst, false);
+    assert.equal(info.min, 18);
+  });
 });
 

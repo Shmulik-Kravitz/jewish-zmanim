@@ -1,4 +1,2 @@
-import type { CityInfo, CityRow, ChabadZmanim, CoordinateOptions, SunCalcResult, TimezoneResult } from './interfaces.js';
-export type { CityInfo, CityRow, ChabadZmanim, CoordinateOptions, SunCalcResult, TimezoneResult };
-
+export type  * from './interfaces';
 export * from './zmanim';

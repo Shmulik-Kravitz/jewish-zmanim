@@ -22,18 +22,11 @@ export class Zmanim {
   private year: number;
   private shabatmin: number;
 
-  constructor(cityInfo: CityInfo, date?: string) {
-    if (!date) {
-      const now = new Date();
-      this.mon = now.getMonth() + 1;
-      this.mday = now.getDate();
-      this.year = now.getFullYear();
-    } else {
-      const parts = date.split('-');
-      this.year = parseInt(parts[0]);
-      this.mon = parseInt(parts[1]);
-      this.mday = parseInt(parts[2]);
-    }
+  constructor(cityInfo: CityInfo, date?: Date) {
+    const d = date ?? new Date();
+    this.year = d.getFullYear();
+    this.mon = d.getMonth() + 1;
+    this.mday = d.getDate();
 
     const dateStr = `${this.year}-${String(this.mon).padStart(2, '0')}-${String(this.mday).padStart(2, '0')} 12:00:00`;
 
@@ -247,16 +240,17 @@ export class Zmanim {
    * יצירת Zmanim מקואורדינטות בלבד – timezone ו-DST מחושבים אוטומטית.
    * @param lat Latitude
    * @param lng Longitude
-   * @param date Date string "YYYY-MM-DD"
+   * @param date Date object
    * @param options Optional: timezoneName, elevation, candleMinutes, tefillinDeg
    */
   static fromCoordinates(
     lat: number,
     lng: number,
-    date: string,
+    date: Date,
     options?: CoordinateOptions
   ): Zmanim & { timezoneInfo: TimezoneResult } {
-    const tz = resolveTimezone(lat, lng, date, options?.timezoneName);
+    const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    const tz = resolveTimezone(lat, lng, dateStr, options?.timezoneName);
 
     // Auto-detect candle lighting minutes for Israel
     const isIsrael = lat >= 29 && lat <= 34 && lng >= 34 && lng <= 36;
@@ -287,13 +281,14 @@ export class Zmanim {
     return z;
   }
 
-  static getCityInfoByRow(row: CityRow, dateStr: string): CityInfo {
+  static getCityInfoByRow(row: CityRow, date: Date): CityInfo {
     const timezoneName = Zmanim.getTimezoneName(row);
 
     let timezoneOffset: number;
     let dst: boolean;
 
     try {
+      const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
       const info = getTimezoneInfo(dateStr, timezoneName);
       timezoneOffset = info.offset;
       dst = info.dst;
