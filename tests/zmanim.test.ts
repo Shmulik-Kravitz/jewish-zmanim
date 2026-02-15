@@ -1,50 +1,265 @@
 import { describe, it, assert } from 'vitest';
 import { Zmanim, CityInfo, CityRow, ChabadZmanim } from '../src/index';
 
+// Central registry of all CityInfo instances used in the tests
+const CITY_INFOS = {
+  // Jerusalem city info - winter (IST = UTC+2)
+  jerusalemWinter: {
+    latitude: 31.7683,
+    longitude: 35.2137,
+    country: 'Israel',
+    city: 'Jerusalem',
+    timezone: 2,
+    dst: false,
+    min: 40,
+  },
 
-// Jerusalem city info - winter (IST = UTC+2)
-const jerusalemWinter: CityInfo = {
-  latitude: 31.7683,
-  longitude: 35.2137,
-  country: 'Israel',
-  city: 'Jerusalem',
-  timezone: 2,
-  dst: false,
-  min: 40,
-};
+  // Jerusalem city info - summer (IDT = UTC+3)
+  jerusalemSummer: {
+    latitude: 31.7683,
+    longitude: 35.2137,
+    country: 'Israel',
+    city: 'Jerusalem',
+    timezone: 3,
+    dst: true,
+    min: 40,
+  },
 
-// Jerusalem city info - summer (IDT = UTC+3)
-const jerusalemSummer: CityInfo = {
-  latitude: 31.7683,
-  longitude: 35.2137,
-  country: 'Israel',
-  city: 'Jerusalem',
-  timezone: 3,
-  dst: true,
-  min: 40,
-};
+  // Tel Aviv city info - summer
+  telAvivSummer: {
+    latitude: 32.0853,
+    longitude: 34.7818,
+    country: 'Israel',
+    city: 'Tel Aviv',
+    timezone: 3,
+    dst: true,
+    min: 23,
+  },
 
-// Tel Aviv city info - summer
-const telAvivSummer: CityInfo = {
-  latitude: 32.0853,
-  longitude: 34.7818,
-  country: 'Israel',
-  city: 'Tel Aviv',
-  timezone: 3,
-  dst: true,
-  min: 23,
-};
+  // New York city info
+  newYorkInfo: {
+    latitude: 40.7128,
+    longitude: -74.006,
+    country: 'United States',
+    city: 'New York',
+    timezone: -5,
+    dst: false,
+    min: 18,
+  },
 
-// New York city info
-const newYorkInfo: CityInfo = {
-  latitude: 40.7128,
-  longitude: -74.006,
-  country: 'United States',
-  city: 'New York',
-  timezone: -5,
-  dst: false,
-  min: 18,
-};
+  // Accuracy tests vs MyZmanim – elevated Jerusalem & Safed
+  jerusalemElev: {
+    latitude: 31.7683,
+    longitude: 35.2137,
+    country: 'Israel',
+    city: 'Jerusalem',
+    timezone: 2,
+    dst: false,
+    min: 40,
+    elevation: 650,
+  },
+  safedElev: {
+    latitude: 32.9646,
+    longitude: 35.496,
+    country: 'Israel',
+    city: 'Safed',
+    timezone: 2,
+    dst: false,
+    min: 30,
+    elevation: 570,
+  },
+
+  // Brooklyn
+  brooklynInfo: {
+    latitude: 40.6782,
+    longitude: -73.9442,
+    country: 'United States',
+    city: 'Brooklyn',
+    timezone: -5,
+    dst: false,
+    min: 18,
+    elevation: 0,
+  },
+
+  // Paris
+  parisInfo: {
+    latitude: 48.8566,
+    longitude: 2.3522,
+    country: 'France',
+    city: 'Paris',
+    timezone: 1,
+    dst: false,
+    min: 18,
+    elevation: 0,
+  },
+
+  // Beit Shemesh (elevation 205m, tz 2, Israel, min 40)
+  beitShemeshInfo: {
+    latitude: 31.7514,
+    longitude: 34.9886,
+    country: 'Israel',
+    city: 'Beit Shemesh',
+    timezone: 2,
+    dst: false,
+    min: 40,
+    elevation: 205,
+  },
+
+  // Modiin (sea level, tz 2, Israel, min 30)
+  modiinInfo: {
+    latitude: 31.8978,
+    longitude: 35.0104,
+    country: 'Israel',
+    city: 'Modiin',
+    timezone: 2,
+    dst: false,
+    min: 30,
+    elevation: 0,
+  },
+
+  // Maaleh Adumim (sea level, tz 2, Israel, min 30, tefillin 11°)
+  maalehAdumimInfo: {
+    latitude: 31.7771,
+    longitude: 35.3088,
+    country: 'Israel',
+    city: 'Maaleh Adumim',
+    timezone: 2,
+    dst: false,
+    min: 30,
+    elevation: 0,
+    tefillinDeg: 11,
+  },
+
+  // Haifa (sea level, tz 2, Israel, min 30)
+  haifaInfo: {
+    latitude: 32.794,
+    longitude: 34.9896,
+    country: 'Israel',
+    city: 'Haifa',
+    timezone: 2,
+    dst: false,
+    min: 30,
+    elevation: 0,
+  },
+
+  // London (sea level, tz 0, min 18)
+  londonInfo: {
+    latitude: 51.5074,
+    longitude: -0.1278,
+    country: 'United Kingdom',
+    city: 'London',
+    timezone: 0,
+    dst: false,
+    min: 18,
+    elevation: 0,
+  },
+
+  // Melbourne (sea level, tz 11 AEDT, min 18, Southern Hemisphere)
+  melbourneInfo: {
+    latitude: -37.8136,
+    longitude: 144.9631,
+    country: 'Australia',
+    city: 'Melbourne',
+    timezone: 11,
+    dst: true,
+    min: 18,
+    elevation: 0,
+  },
+
+  // Miami (sea level, tz -5, min 18)
+  miamiInfo: {
+    latitude: 25.7617,
+    longitude: -80.1918,
+    country: 'United States',
+    city: 'Miami',
+    timezone: -5,
+    dst: false,
+    min: 18,
+    elevation: 0,
+  },
+
+  // Beer Sheva (sea level, tz 2, Israel, min 20)
+  beerShevaInfo: {
+    latitude: 31.2518,
+    longitude: 34.7913,
+    country: 'Israel',
+    city: 'Beer Sheva',
+    timezone: 2,
+    dst: false,
+    min: 20,
+    elevation: 0,
+  },
+
+  // Eilat (sea level, tz 2, Israel, min 30)
+  eilatInfo: {
+    latitude: 29.5577,
+    longitude: 34.9519,
+    country: 'Israel',
+    city: 'Eilat',
+    timezone: 2,
+    dst: false,
+    min: 30,
+    elevation: 0,
+  },
+
+  // Sarcelles (sea level, tz 1, min 18)
+  sarcellesInfo: {
+    latitude: 48.9955,
+    longitude: 2.3808,
+    country: 'France',
+    city: 'Sarcelles',
+    timezone: 1,
+    dst: false,
+    min: 18,
+    elevation: 0,
+  },
+
+  // Kiryat Malachi (sea level, tz 2, Israel, min 30)
+  kiryatMalachiInfo: {
+    latitude: 31.7326,
+    longitude: 34.7449,
+    country: 'Israel',
+    city: 'Kiryat Malachi',
+    timezone: 2,
+    dst: false,
+    min: 30,
+    elevation: 0,
+  },
+
+  // Utility test city with timezone 13
+  tz13City: {
+    latitude: 0,
+    longitude: 0,
+    country: '',
+    city: '',
+    timezone: 13,
+    dst: false,
+    min: 18,
+  },
+} as const satisfies Record<string, CityInfo>;
+
+const {
+  jerusalemWinter,
+  jerusalemSummer,
+  telAvivSummer,
+  newYorkInfo,
+  jerusalemElev,
+  safedElev,
+  brooklynInfo,
+  parisInfo,
+  beitShemeshInfo,
+  modiinInfo,
+  maalehAdumimInfo,
+  haifaInfo,
+  londonInfo,
+  melbourneInfo,
+  miamiInfo,
+  beerShevaInfo,
+  eilatInfo,
+  sarcellesInfo,
+  kiryatMalachiInfo,
+  tz13City,
+} = CITY_INFOS;
 
 function timeToMinutes(timeStr: string): number {
   const [h, m] = timeStr.split(':').map(Number);
@@ -252,18 +467,6 @@ function assertWithinSeconds(actual: string, expected: string, maxDiff: number, 
   assert.ok(d <= maxDiff, `${label}: ${actual} vs ${expected} (diff ${d}s, max ${maxDiff}s)`);
 }
 
-const jerusalemElev: CityInfo = {
-  latitude: 31.7683, longitude: 35.2137,
-  country: 'Israel', city: 'Jerusalem',
-  timezone: 2, dst: false, min: 40, elevation: 650,
-};
-
-const safedElev: CityInfo = {
-  latitude: 32.9646, longitude: 35.4960,
-  country: 'Israel', city: 'Safed',
-  timezone: 2, dst: false, min: 30, elevation: 570,
-};
-
 describe('Zmanim - accuracy vs MyZmanim (Jerusalem Feb 8 2026)', () => {
   const z = new Zmanim(jerusalemElev, new Date('2026-02-08'));
   const T = 30; // tolerance in seconds
@@ -293,12 +496,6 @@ describe('Zmanim - accuracy vs MyZmanim (Safed Feb 13 2026)', () => {
   it('tzeis within 30s', () => assertWithinSeconds(z.times.tzesHakochavim, '17:58:47', T, 'tzeis'));
   it('candle lighting within 30s', () => assertWithinSeconds(z.times.shabbosEnter, '16:55:20', T, 'candles'));
 });
-
-const brooklynInfo: CityInfo = {
-  latitude: 40.6782, longitude: -73.9442,
-  country: 'United States', city: 'Brooklyn',
-  timezone: -5, dst: false, min: 18, elevation: 0,
-};
 
 describe('Zmanim - accuracy vs MyZmanim (Brooklyn Feb 8 2026)', () => {
   const z = new Zmanim(brooklynInfo, new Date('2026-02-08'));
@@ -331,12 +528,6 @@ describe('Zmanim - accuracy vs MyZmanim (Brooklyn Feb 13 2026 Shabbat)', () => {
   it('candle lighting within 5s', () => assertWithinSeconds(z.times.shabbosEnter, '17:10:24', T, 'candles'));
 });
 
-const parisInfo: CityInfo = {
-  latitude: 48.8566, longitude: 2.3522,
-  country: 'France', city: 'Paris',
-  timezone: 1, dst: false, min: 18, elevation: 0,
-};
-
 describe('Zmanim - accuracy vs MyZmanim (Paris Feb 8 2026)', () => {
   const z = new Zmanim(parisInfo, new Date('2026-02-08'));
   const T = 10;
@@ -365,12 +556,6 @@ describe('Zmanim - accuracy vs MyZmanim (Paris Feb 13 2026 Shabbat)', () => {
 });
 
 // Beit Shemesh (elevation 205m, tz 2, Israel, min 40)
-const beitShemeshInfo: CityInfo = {
-  latitude: 31.7514, longitude: 34.9886,
-  country: 'Israel', city: 'Beit Shemesh',
-  timezone: 2, dst: false, min: 40, elevation: 205,
-};
-
 describe('Zmanim - accuracy vs MyZmanim (Beit Shemesh Feb 8 2026)', () => {
   const z = new Zmanim(beitShemeshInfo, new Date('2026-02-08'));
   const T = 10;
@@ -398,12 +583,6 @@ describe('Zmanim - accuracy vs MyZmanim (Beit Shemesh Feb 13 2026 Shabbat)', () 
 });
 
 // Modiin (sea level, tz 2, Israel, min 30)
-const modiinInfo: CityInfo = {
-  latitude: 31.8978, longitude: 35.0104,
-  country: 'Israel', city: 'Modiin',
-  timezone: 2, dst: false, min: 30, elevation: 0,
-};
-
 describe('Zmanim - accuracy vs MyZmanim (Modiin Feb 8 2026)', () => {
   const z = new Zmanim(modiinInfo, new Date('2026-02-08'));
   const T = 5;
@@ -430,12 +609,6 @@ describe('Zmanim - accuracy vs MyZmanim (Modiin Feb 13 2026 Shabbat)', () => {
 });
 
 // Maaleh Adumim (sea level, tz 2, Israel, min 30, tefillin 11°)
-const maalehAdumimInfo: CityInfo = {
-  latitude: 31.7771, longitude: 35.3088,
-  country: 'Israel', city: 'Maaleh Adumim',
-  timezone: 2, dst: false, min: 30, elevation: 0, tefillinDeg: 11,
-};
-
 describe('Zmanim - accuracy vs MyZmanim (Maaleh Adumim Feb 8 2026)', () => {
   const z = new Zmanim(maalehAdumimInfo, new Date('2026-02-08'));
   const T = 5;
@@ -463,12 +636,6 @@ describe('Zmanim - accuracy vs MyZmanim (Maaleh Adumim Feb 13 2026 Shabbat)', ()
 });
 
 // Haifa (sea level, tz 2, Israel, min 30)
-const haifaInfo: CityInfo = {
-  latitude: 32.7940, longitude: 34.9896,
-  country: 'Israel', city: 'Haifa',
-  timezone: 2, dst: false, min: 30, elevation: 0,
-};
-
 describe('Zmanim - accuracy vs MyZmanim (Haifa Feb 8 2026)', () => {
   const z = new Zmanim(haifaInfo, new Date('2026-02-08'));
   const T = 10;
@@ -495,12 +662,6 @@ describe('Zmanim - accuracy vs MyZmanim (Haifa Feb 13 2026 Shabbat)', () => {
 });
 
 // London (sea level, tz 0, min 18)
-const londonInfo: CityInfo = {
-  latitude: 51.5074, longitude: -0.1278,
-  country: 'United Kingdom', city: 'London',
-  timezone: 0, dst: false, min: 18, elevation: 0,
-};
-
 describe('Zmanim - accuracy vs MyZmanim (London Feb 8 2026)', () => {
   const z = new Zmanim(londonInfo, new Date('2026-02-08'));
   const T = 10;
@@ -515,12 +676,6 @@ describe('Zmanim - accuracy vs MyZmanim (London Feb 8 2026)', () => {
 });
 
 // Melbourne (sea level, tz 11 AEDT, min 18, Southern Hemisphere)
-const melbourneInfo: CityInfo = {
-  latitude: -37.8136, longitude: 144.9631,
-  country: 'Australia', city: 'Melbourne',
-  timezone: 11, dst: true, min: 18, elevation: 0,
-};
-
 describe('Zmanim - accuracy vs MyZmanim (Melbourne Feb 9 2026)', () => {
   const z = new Zmanim(melbourneInfo, new Date('2026-02-09'));
   const T = 10;
@@ -548,12 +703,6 @@ describe('Zmanim - accuracy vs MyZmanim (Melbourne Feb 13 2026 Shabbat)', () => 
 });
 
 // Miami (sea level, tz -5, min 18)
-const miamiInfo: CityInfo = {
-  latitude: 25.7617, longitude: -80.1918,
-  country: 'United States', city: 'Miami',
-  timezone: -5, dst: false, min: 18, elevation: 0,
-};
-
 describe('Zmanim - accuracy vs MyZmanim (Miami Feb 8 2026)', () => {
   const z = new Zmanim(miamiInfo, new Date('2026-02-08'));
   const T = 5;
@@ -581,12 +730,6 @@ describe('Zmanim - accuracy vs MyZmanim (Miami Feb 13 2026 Shabbat)', () => {
 });
 
 // Beer Sheva (sea level, tz 2, Israel, min 20)
-const beerShevaInfo: CityInfo = {
-  latitude: 31.2518, longitude: 34.7913,
-  country: 'Israel', city: 'Beer Sheva',
-  timezone: 2, dst: false, min: 20, elevation: 0,
-};
-
 describe('Zmanim - accuracy vs MyZmanim (Beer Sheva Feb 8 2026)', () => {
   const z = new Zmanim(beerShevaInfo, new Date('2026-02-08'));
   const T = 5;
@@ -613,12 +756,6 @@ describe('Zmanim - accuracy vs MyZmanim (Beer Sheva Feb 13 2026 Shabbat)', () =>
 });
 
 // Eilat (sea level, tz 2, Israel, min 30)
-const eilatInfo: CityInfo = {
-  latitude: 29.5577, longitude: 34.9519,
-  country: 'Israel', city: 'Eilat',
-  timezone: 2, dst: false, min: 30, elevation: 0,
-};
-
 describe('Zmanim - accuracy vs MyZmanim (Eilat Feb 8 2026)', () => {
   const z = new Zmanim(eilatInfo, new Date('2026-02-08'));
   const T = 5;
@@ -645,12 +782,6 @@ describe('Zmanim - accuracy vs MyZmanim (Eilat Feb 13 2026 Shabbat)', () => {
 });
 
 // Sarcelles (sea level, tz 1, min 18)
-const sarcellesInfo: CityInfo = {
-  latitude: 48.9955, longitude: 2.3808,
-  country: 'France', city: 'Sarcelles',
-  timezone: 1, dst: false, min: 18, elevation: 0,
-};
-
 describe('Zmanim - accuracy vs MyZmanim (Sarcelles Feb 8 2026)', () => {
   const z = new Zmanim(sarcellesInfo, new Date('2026-02-08'));
   const T = 10;
@@ -676,12 +807,6 @@ describe('Zmanim - accuracy vs MyZmanim (Sarcelles Feb 13 2026 Shabbat)', () => 
 });
 
 // Kiryat Malachi (sea level, tz 2, Israel, min 30)
-const kiryatMalachiInfo: CityInfo = {
-  latitude: 31.7326, longitude: 34.7449,
-  country: 'Israel', city: 'Kiryat Malachi',
-  timezone: 2, dst: false, min: 30, elevation: 0,
-};
-
 describe('Zmanim - accuracy vs MyZmanim (Kiryat Malachi Feb 13 2026 Shabbat)', () => {
   const z = new Zmanim(kiryatMalachiInfo, new Date('2026-02-13'));
   const c = z.getChabadZmanim();
@@ -806,15 +931,6 @@ describe('Zmanim - utility methods', () => {
   });
 
   it('handles timezone 13 edge case via calcTimes', () => {
-    const tz13City: CityInfo = {
-      latitude: 0,
-      longitude: 0,
-      country: '',
-      city: '',
-      timezone: 13,
-      dst: false,
-      min: 18,
-    };
     const z = new Zmanim(tz13City, new Date('2024-01-01'));
     const res = z.calcTimes();
     assert.ok(typeof res.sunrise === 'string');
