@@ -62,6 +62,27 @@ Zmanim.fromCoordinates(31.7683, 35.2137, new Date('2026-02-08'), {
 });
 ```
 
+## Shabbat & Yom Tov status
+
+`getTimes()` also returns two live boolean flags — `isShabbat` and `isYomTov` — powered by the [`jewish-holidays`](https://www.npmjs.com/package/jewish-holidays) package. Unlike a plain calendar lookup, they are **time-aware**: they follow the halachic day, which runs from candle-lighting on the erev to tzeis (nightfall).
+
+```typescript
+import { Zmanim, cities } from 'jewish-zmanim';
+
+// Friday evening, after candle-lighting → already Shabbat
+const erev = Zmanim.fromCityRow(cities.israel.jerusalem, new Date('2026-07-17T19:30:00'));
+console.log(erev.getTimes().isShabbat); // true
+
+// Saturday night, after tzeis → Shabbat is over
+const motzash = Zmanim.fromCityRow(cities.israel.jerusalem, new Date('2026-07-18T23:00:00'));
+console.log(motzash.getTimes().isShabbat); // false
+```
+
+- **`isShabbat`** — `true` on Shabbat before tzeis, and on Erev Shabbat once past candle-lighting (`shabbosEnter`).
+- **`isYomTov`** — `true` on Yom Tov before tzeis, and on Erev Yom Tov once past candle-lighting. Multi-day festivals (e.g. the two days of Rosh Hashana, or diaspora second days) stay `true` through the intervening night and only end at tzeis on the final day. Israel vs. diaspora (`isChutzLaaretz`) is derived automatically from the city/coordinates.
+
+The reference moment is the **time-of-day of the `Date` you pass in**. A date-only value (midnight) therefore reports the plain calendar-day status; pass a full timestamp (or `new Date()`) to get the exact live status.
+
 ## Available cities
 
 ```typescript
@@ -96,14 +117,14 @@ or use any GPS coordinates
 
 ### `ZmanimTimes` fields
 
-`alosHashachar`, `tefillin` (misheyakir), `netzHachama` (sunrise), `sofZmanShemaMGA`, `kriasShema`, `tefila`, `chatzos`, `minchaGedola`, `plagHamincha`, `shkiah`, `shkiahElevated`, `tzesHakochavim`, `tzeisRT` (Rabbeinu Tam), `shabbosEnter` / `shabbosEnterUnix`, `shabbosExit` / `shabbosExitUnix`, `DST`, `date`.
+`alosHashachar`, `tefillin` (misheyakir), `netzHachama` (sunrise), `sofZmanShemaMGA`, `kriasShema`, `tefila`, `chatzos`, `minchaGedola`, `plagHamincha`, `shkiah`, `shkiahElevated`, `tzesHakochavim`, `tzeisRT` (Rabbeinu Tam), `shabbosEnter` / `shabbosEnterUnix`, `shabbosExit` / `shabbosExitUnix`, `isShabbat`, `isYomTov`, `DST`, `date`.
 
-Times are returned as `"H:MM:SS"` strings in the location's local time; the `*Unix` fields are epoch seconds.
+Times are returned as `"H:MM:SS"` strings in the location's local time; the `*Unix` fields are epoch seconds; `isShabbat` and `isYomTov` are booleans (see [Shabbat & Yom Tov status](#shabbat--yom-tov-status)).
 
 ## Development
 
 ```bash
-yarn test --run   # run the test suite (269 tests, 17 cities across 6 countries)
+yarn test --run   # run the test suite (285 tests, 17 cities across 6 countries)
 yarn typecheck    # type-check
 yarn build        # bundle to dist/ (dual CJS + ESM)
 ```

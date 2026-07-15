@@ -64,6 +64,7 @@
   },
   "packageManager": "yarn@4.13.0",
   "dependencies": {
-    "geo-tz": "^8.1.8"
+    "geo-tz": "^8.1.8",
+    "jewish-holidays": "^1.2.1"
   }
 }

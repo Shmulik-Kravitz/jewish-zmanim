@@ -6,6 +6,7 @@ import type {
   ZmanimTimes,
 } from './interfaces';
 
+import { isErevShabbat, isErevYomTov, isShabbat, isYomTov } from 'jewish-holidays';
 import { elevatedZenith, calcSunTimes as meeusCalc, sunriseZenith } from './solar';
 import { getTimezoneInfo, resolveTimezone } from './timezone';
 
@@ -116,6 +117,32 @@ export class Zmanim {
     this.times.chatzotLayla = this.toTime(chatzotLayla);
 
     this.shabes();
+
+    // Jewish calendar flags for the given date (jewish-holidays package).
+    // isChutzLaaretz is true for the diaspora (non-Israel) so festival second days count.
+    // The reference moment is the time-of-day of the input `date` (a date-only input at
+    // midnight therefore reports the plain calendar-day value).
+    const chutzLaaretz = !this.isIsraelCity();
+    const gregorian = new Date(this.year, this.mon - 1, this.mday);
+    const refHours = d.getHours() + d.getMinutes() / 60 + d.getSeconds() / 3600;
+
+    // Shabbat/Yom Tov begin at candle-lighting on the erev and end at tzeis (nightfall).
+    // Candle-lighting is today's (elevated) sunset minus the candle-lighting offset — on a
+    // Friday this equals shabbosEnter, and it is likewise correct on any Erev Yom Tov.
+    const beforeTzeis = refHours < tzeitResult.sunset;
+    const afterCandleLighting = refHours >= elevStd.sunset - this.shabatmin / 60;
+
+    this.times.isShabbat =
+      (isShabbat(gregorian) && beforeTzeis) || (isErevShabbat(gregorian) && afterCandleLighting);
+
+    // A Yom Tov whose next day is also Yom Tov (2-day festivals, diaspora second days)
+    // does not end at its own tzeis — it runs on into the night, so skip the tzeis gate.
+    const yomTovToday = isYomTov(gregorian, chutzLaaretz);
+    const yomTovContinuesTonight = isYomTov(tomorrow, chutzLaaretz);
+    this.times.isYomTov =
+      (yomTovToday && (yomTovContinuesTonight || beforeTzeis)) ||
+      (isErevYomTov(gregorian) && afterCandleLighting);
+
     this.times.DST = this.DST;
     this.times.date = dateStr;
   }
@@ -326,6 +353,8 @@ export class Zmanim {
       shabbosEnterUnix: this.times.shabat_start_unix as number,
       shabbosExit: this.times.shabbosExit as string,
       shabbosExitUnix: this.times.shabat_ends_unix as number,
+      isShabbat: this.times.isShabbat as boolean,
+      isYomTov: this.times.isYomTov as boolean,
       DST: this.times.DST as boolean,
       date: this.times.date as string,
     };

@@ -52,6 +52,8 @@ export interface ZmanimTimes {
   shabbosEnterUnix: number;
   shabbosExit: string;
   shabbosExitUnix: number;
+  isShabbat: boolean;
+  isYomTov: boolean;
   DST: boolean;
   date: string;
 }

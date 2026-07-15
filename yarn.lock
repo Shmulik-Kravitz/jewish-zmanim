@@ -1283,6 +1283,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"gematriya@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "gematriya@npm:2.0.0"
+  checksum: 10c0/f9cf8e78b421efcb856ce51800401bcfd69a375bc77d8d53bd662851248066c429b45810c94170dde2e81dbd8d51603f26fa3572c16ab1f72c119905ba30a20d
+  languageName: node
+  linkType: hard
+
 "geo-tz@npm:^8.1.8":
   version: 8.1.8
   resolution: "geo-tz@npm:8.1.8"
@@ -1489,6 +1496,31 @@ __metadata:
   languageName: node
   linkType: hard
 
+"jewish-date@npm:^2.0.20":
+  version: 2.0.23
+  resolution: "jewish-date@npm:2.0.23"
+  dependencies:
+    gematriya: "npm:^2.0.0"
+  checksum: 10c0/9e53442e0ac0bea64107fe4cb47e7fd131b519efa4172dbdd60136621a9798a036ec99efd1d63c8dc2556b0727b379ca5d654d09b25a86fa32c2b2c559a74877
+  languageName: node
+  linkType: hard
+
+"jewish-holidays@npm:^1.2.1":
+  version: 1.2.1
+  resolution: "jewish-holidays@npm:1.2.1"
+  dependencies:
+    jewish-date: "npm:^2.0.20"
+  dependenciesMeta:
+    "@microsoft/api-extractor":
+      unplugged: true
+    "@microsoft/api-extractor-model":
+      unplugged: true
+    jewish-date:
+      unplugged: true
+  checksum: 10c0/4bc7b68496d73c7da3d2b3da95e0436416d31118bb0e2035b17350e76cc46b46636274230aac890dc497cbd293a1c429ae2a5d4f9d453172d7da6015649c6bf6
+  languageName: node
+  linkType: hard
+
 "jewish-zmanim@workspace:.":
   version: 0.0.0-use.local
   resolution: "jewish-zmanim@workspace:."
@@ -1499,6 +1531,7 @@ __metadata:
     bumpp: "npm:^11.0.1"
     geo-tz: "npm:^8.1.8"
     husky: "npm:^9.1.7"
+    jewish-holidays: "npm:^1.2.1"
     lint-staged: "npm:^16.4.0"
     tsdown: "npm:^0.22.8"
     typescript: "npm:^6.0.2"
